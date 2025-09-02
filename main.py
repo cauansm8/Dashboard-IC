@@ -75,7 +75,7 @@ def update_output(contents):
                                 
         # cria a figura do gráfico -> modelagem -> !!!! AQUI SERÁ ALTERADO PARA GERAR:
         #               gráfico de dispersão, gráfico de linhas e mapas de calor.
-        fig = px.bar(df, x=df.columns[0], y=df.columns[1])
+        fig = px.line(df, x=df.columns[0], y=df.columns[1], markers=True)
 
         # retorna a figura para o site
         return dcc.Graph(figure=fig)
