@@ -1,7 +1,9 @@
 import dash
 from dash import dcc, html, Output, Input, State
 import plotly.express as px
+import matplotlib.pyplot as plt 
 import pandas as pd
+import seaborn as sns
 import numpy as np
 import io
 import base64
@@ -23,7 +25,7 @@ app.layout = html.Div([
             html.A('Selecione um arquivo CSV')
         ]),
         style={
-            'width': '50%',
+            'width': '20%',
             'borderWidth': '1px',
             'borderStyle': 'dashed',
             'borderRadius': '5px',
@@ -74,8 +76,6 @@ def update_output(contents):
         #                                            esse sep indica o formato que separa as informações -> , + espaco
         df = pd.read_csv(io.StringIO(conteudo_decodificado.decode('utf-8')), sep=r",\s*", engine="python", header=None, names=['Fx', 'Fy', 'Fz', 'Mx', 'My', 'Mz'])
 
-        print (df.head())
-
         # az0 (espessura): medida de az0 transformada em metros, pois a plataforma de força está em metros
         az0 = 0.0433
 
@@ -103,17 +103,39 @@ def update_output(contents):
         max_OrigemAP = np.max(np.abs(df['OrigemCOP_AP']))
         origemlimite_extremo = np.max([max_OrigemML, max_OrigemAP]) # Tales usou esta variável para definir os limites do gráfico!
 
-        # Comparando o head do df atual com o df anterior
-        print (df.head())
-
-        print ("\n\n\n(DEBUG) - CHEGOU AQUI?????")
 
         # cria a figura do gráfico -> modelagem -> !!!! AQUI SERÁ ALTERADO PARA GERAR:
         #               gráfico de dispersão, gráfico de linhas e mapas de calor.
-        fig = px.line(df, x='OrigemCOP_ML', y='OrigemCOP_AP', markers=True)
+        # Gráfico de Violino com Box-Plot
+        fig1 = px.violin(df, x="OrigemCOP_ML",
+                        box=True, points='all', hover_data=df.columns,
+                        labels={"OrigemCOP_ML": "COP_ML (cm)"}, 
+                        range_x=[-origemlimite_extremo, origemlimite_extremo],
+                        title="Gráfico de Violino"
+                        )
+        
+        # Gráfico de Dispersão
+        fig2 = px.scatter(df, x="OrigemCOP_ML", y="OrigemCOP_AP",
+                        labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
+                        range_x=[-origemlimite_extremo, origemlimite_extremo],
+                        title="Gráfico de Dispersão"
+                        )
+        
+        # Mapa de Calor
+        fig3 = px.density_heatmap(df, x="OrigemCOP_ML", y="OrigemCOP_AP",
+                        labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
+                        range_x=[-origemlimite_extremo, origemlimite_extremo],
+                        title="Mapa de Calor"
+                        )
 
-        # retorna a figura para o site
-        return dcc.Graph(figure=fig)
+        # retorna um div com os gráficos para o site
+        return html.Div([
+            dcc.Graph(figure=fig1),
+
+            dcc.Graph(figure=fig2),
+
+            dcc.Graph(figure=fig3)
+        ])
 
     except Exception as e:
         
