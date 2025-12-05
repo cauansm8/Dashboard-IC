@@ -1,9 +1,9 @@
 import dash
 from dash import dcc, html, Output, Input, State
 import plotly.express as px
+from plotly.subplots import make_subplots
 import matplotlib.pyplot as plt 
 import pandas as pd
-import seaborn as sns
 import numpy as np
 import io
 import base64
@@ -33,8 +33,8 @@ app.layout = html.Div([
             'margin': '10px auto'
         },
         
-        # permite somente um arquivo por vez
-        multiple=False  
+        # permite mais de um arquivo por vez -> o 'contents' é uma lista 
+        multiple=True  
     ),
     
     # div para o gráfico -> quando o arquivo for inserido, ele automaticamente será lido e tentará gerar o gráfico
@@ -43,7 +43,6 @@ app.layout = html.Div([
 
 
 # faz as chamadas (quando ocorre alguma mudança - evento)
-
 @app.callback(
     
     # quando ocorrer algum evento, vai alterar a div com id output-grafico
@@ -56,14 +55,104 @@ app.layout = html.Div([
 )
 
 def update_output(contents):
+    
+    df = []
 
-    # basicamente divide o conteudo (data:text/csv;base64,QUxVTSxCTg...) na vírgula
-    # tipo_do_conteudo recebe -> data:text/csv;base64
-    # string_do_conteudo recebe o conteúdo do arquivo (vai se transformar no nosso dataframe do gráfico)     
+    # le o arquivos e passa como ao df como lista (mesmo se for só um arquivo inserido)
+    for i in range(len(contents)):
+        df.append(gerarDf(contents[i]))
+
+    # caso 1 -> 1 arquivo (segue o que já foi implementado anteriormente)
+    if len(df) == 1:
+        
+        # Gráfico de Violino com Box-Plot
+        fig1 = px.violin(df[0], x="OrigemCOP_ML",
+                        box=True, points='all', hover_data=df[0].columns,
+                        labels={"OrigemCOP_ML": "COP_ML (cm)"}, 
+                        
+                        title="Gráfico de Violino"
+                        )
+        
+        # Gráfico de Dispersão
+        fig2 = px.scatter(df[0], x="OrigemCOP_ML", y="OrigemCOP_AP",
+                        labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
+                    
+                        title="Gráfico de Dispersão"
+                        )
+        
+        # Mapa de Calor
+        fig3 = px.density_heatmap(df[0], x="OrigemCOP_ML", y="OrigemCOP_AP",
+                        labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
+                        
+                        title="Mapa de Calor"
+                        )
+        # retorna um div com os gráficos para o site
+        return html.Div([
+            dcc.Graph(figure=fig1),
+            dcc.Graph(figure=fig2),
+            dcc.Graph(figure=fig3)
+        ])
+    
+    # caso 2: para mais de um gráf -> subplots
+    else:
+
+        # cada subplot tem x (sendo x o numero de arquivos inseridos) colunas
+        fig1_sp = make_subplots(rows=1, cols = len(df))
+        fig2_sp = make_subplots(rows=1, cols = len(df))
+        fig3_sp = make_subplots(rows=1, cols = len(df))
+
+        # gera a figura e add na figura_subplot
+        for i in range(len(df)):
+            
+            # Gráfico de Violino com Box-Plot
+            fig1 = px.violin(df[i], x="OrigemCOP_ML",
+                        box=True, points='all', hover_data = df[i].columns,
+                        labels={"OrigemCOP_ML": "COP_ML (cm)"}, 
+                        title="Gráfico de Violino"
+                        )
+            
+            # add o subplot 
+            for trace in fig1.data:
+                fig1_sp.add_trace(trace, row=1, col=i+1)
+
+
+        for i in range(len(df)):
+
+            # Gráfico de Dispersão
+            fig2 = px.scatter(df[i], x="OrigemCOP_ML", y="OrigemCOP_AP",
+                        labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
+                        title="Gráfico de Dispersão"
+                        )
+            
+            # add o subplot
+            for trace in fig2.data:
+                fig2_sp.add_trace(trace, row=1, col=i+1)
+
+
+        for i in range(len(df)):
+
+            # Mapa de Calor
+            fig3 = px.density_heatmap(df[i], x="OrigemCOP_ML", y="OrigemCOP_AP",
+                        labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
+                        title="Mapa de Calor"
+                        )
+            
+            # add subplot
+            for trace in fig3.data:
+                fig3_sp.add_trace(trace, row=1, col=i+1)
+
+
+        return html.Div([
+            dcc.Graph(figure=fig1_sp),
+            dcc.Graph(figure=fig2_sp),
+            dcc.Graph(figure=fig3_sp)
+        ])
+
+
+# somente gera o df (e preciso separar para dps implementar a inserção de +1 arquivo)
+def gerarDf (contents):
+    
     tipo_do_conteudo, string_do_conteudo = contents.split(',')
-
-    print (f"\n\nTipo do conteudo: {tipo_do_conteudo}")
-    print (f"String do conteudo: {string_do_conteudo}\n\n")
 
     # decodifica o conteudo do arquivo para bytes (binário)
     conteudo_decodificado = base64.b64decode(string_do_conteudo)
@@ -93,57 +182,16 @@ def update_output(contents):
         df['COP_AP'] = cop_y
         df['Tempo'] = x_tempo
 
-
         # Ajustando para a origem (ponto inicial vira 0,0) - Tales usou isto para iniciar as coordenadas no centro (0,0)
         df['OrigemCOP_ML'] = df['COP_ML'] - df['COP_ML'][0]
         df['OrigemCOP_AP'] = df['COP_AP'] - df['COP_AP'][0]
 
-        # Limites de cada eixo
-        max_OrigemML = np.max(np.abs(df['OrigemCOP_ML']))
-        max_OrigemAP = np.max(np.abs(df['OrigemCOP_AP']))
-        origemlimite_extremo = np.max([max_OrigemML, max_OrigemAP]) # Tales usou esta variável para definir os limites do gráfico!
-
-
-        # cria a figura do gráfico -> modelagem -> !!!! AQUI SERÁ ALTERADO PARA GERAR:
-        #               gráfico de dispersão, gráfico de linhas e mapas de calor.
-        # Gráfico de Violino com Box-Plot
-        fig1 = px.violin(df, x="OrigemCOP_ML",
-                        box=True, points='all', hover_data=df.columns,
-                        labels={"OrigemCOP_ML": "COP_ML (cm)"}, 
-                        range_x=[-origemlimite_extremo, origemlimite_extremo],
-                        title="Gráfico de Violino"
-                        )
-        
-        # Gráfico de Dispersão
-        fig2 = px.scatter(df, x="OrigemCOP_ML", y="OrigemCOP_AP",
-                        labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
-                        range_x=[-origemlimite_extremo, origemlimite_extremo],
-                        title="Gráfico de Dispersão"
-                        )
-        
-        # Mapa de Calor
-        fig3 = px.density_heatmap(df, x="OrigemCOP_ML", y="OrigemCOP_AP",
-                        labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
-                        range_x=[-origemlimite_extremo, origemlimite_extremo],
-                        title="Mapa de Calor"
-                        )
-
-        # retorna um div com os gráficos para o site
-        return html.Div([
-            dcc.Graph(figure=fig1),
-
-            dcc.Graph(figure=fig2),
-
-            dcc.Graph(figure=fig3)
-        ])
+        return df
 
     except Exception as e:
-        
-        # tratamento de erro
         return html.Div(f"Ocorreu um erro ao ler o arquivo! {e}")
 
 
-
-# inicia o servidor Dash
 if __name__ == '__main__':
     app.run()
+
