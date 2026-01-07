@@ -64,28 +64,35 @@ def update_output(contents):
 
     # caso 1 -> 1 arquivo (segue o que já foi implementado anteriormente)
     if len(df) == 1:
-        
+
         # Gráfico de Violino com Box-Plot
         fig1 = px.violin(df[0], x="OrigemCOP_ML",
                         box=True, points='all', hover_data=df[0].columns,
                         labels={"OrigemCOP_ML": "COP_ML (cm)"}, 
-                        
                         title="Gráfico de Violino"
                         )
-        
+
+
+
         # Gráfico de Dispersão
         fig2 = px.scatter(df[0], x="OrigemCOP_ML", y="OrigemCOP_AP",
                         labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
-                    
                         title="Gráfico de Dispersão"
                         )
         
+
         # Mapa de Calor
         fig3 = px.density_heatmap(df[0], x="OrigemCOP_ML", y="OrigemCOP_AP",
                         labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
-                        
                         title="Mapa de Calor"
                         )
+
+
+        fig1.update_xaxes(zeroline = True, zerolinewidth = 2, zerolinecolor='black')
+    
+        fig2.update_xaxes(zeroline = True, zerolinewidth=  2, zerolinecolor='black')
+        fig2.update_yaxes(zeroline = True, zerolinewidth = 2, zerolinecolor='black')
+
         # retorna um div com os gráficos para o site
         return html.Div([
             dcc.Graph(figure=fig1),
@@ -97,49 +104,81 @@ def update_output(contents):
     else:
 
         # cada subplot tem x (sendo x o numero de arquivos inseridos) colunas
-        fig1_sp = make_subplots(rows=1, cols = len(df))
-        fig2_sp = make_subplots(rows=1, cols = len(df))
-        fig3_sp = make_subplots(rows=1, cols = len(df))
+        fig1_sp = make_subplots(rows = 1, cols = len(df))
+        fig2_sp = make_subplots(rows = 1, cols = len(df))
+        fig3_sp = make_subplots(rows = 1, cols = len(df))
 
-        # gera a figura e add na figura_subplot
+        # subplot 1
         for i in range(len(df)):
             
             # Gráfico de Violino com Box-Plot
             fig1 = px.violin(df[i], x="OrigemCOP_ML",
-                        box=True, points='all', hover_data = df[i].columns,
-                        labels={"OrigemCOP_ML": "COP_ML (cm)"}, 
-                        title="Gráfico de Violino"
-                        )
+                        box=True, points='all', hover_data = df[i].columns)
             
             # add o subplot 
             for trace in fig1.data:
-                fig1_sp.add_trace(trace, row=1, col=i+1)
+                fig1_sp.add_trace(trace, row = 1, col = i + 1)
 
-
+        # subplot 2
         for i in range(len(df)):
 
             # Gráfico de Dispersão
-            fig2 = px.scatter(df[i], x="OrigemCOP_ML", y="OrigemCOP_AP",
-                        labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
-                        title="Gráfico de Dispersão"
-                        )
+            fig2 = px.scatter(df[i], x="OrigemCOP_ML", y="OrigemCOP_AP")
             
             # add o subplot
             for trace in fig2.data:
-                fig2_sp.add_trace(trace, row=1, col=i+1)
+                fig2_sp.add_trace(trace, row = 1, col = i + 1)
 
-
+        # subplot 3
         for i in range(len(df)):
 
             # Mapa de Calor
-            fig3 = px.density_heatmap(df[i], x="OrigemCOP_ML", y="OrigemCOP_AP",
-                        labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
-                        title="Mapa de Calor"
-                        )
+            fig3 = px.density_heatmap(df[i], x="OrigemCOP_ML", y="OrigemCOP_AP")
             
             # add subplot
             for trace in fig3.data:
-                fig3_sp.add_trace(trace, row=1, col=i+1)
+                fig3_sp.add_trace(trace, row = 1, col = i + 1)
+
+        
+        # colocando labels e titulo
+        fig1_sp.update_layout(title_text = "Gráfico de Violino")
+        
+        for i in range(len(df)):
+            fig1_sp.update_xaxes(
+                title_text = "COP_ML (cm)",
+                row = 1,
+                col = i + 1
+            )
+
+        fig2_sp.update_layout(title_text = "Gráfico de Dispersão")
+        fig3_sp.update_layout(title_text = "Mapa de Calor")
+        
+        for i in range(len(df)):
+            fig2_sp.update_xaxes(
+                title_text = "COP_ML (cm)",
+                row = 1,
+                col = i + 1
+            )
+            fig2_sp.update_yaxes(
+                title_text = "COP_AP (cm)",
+                row = 1,
+                col = i + 1
+            )
+            fig3_sp.update_xaxes(
+                title_text = "COP_ML (cm)",
+                row = 1,
+                col = i + 1
+            )
+            fig3_sp.update_yaxes(
+                title_text = "COP_AP (cm)",
+                row = 1,
+                col = i + 1
+            )
+
+        fig1_sp.update_xaxes(zeroline=True, zerolinewidth = 2, zerolinecolor='black')
+        
+        fig2_sp.update_xaxes(zeroline=True, zerolinewidth = 2, zerolinecolor='black')
+        fig2_sp.update_yaxes(zeroline=True, zerolinewidth = 2, zerolinecolor='black')
 
 
         return html.Div([
