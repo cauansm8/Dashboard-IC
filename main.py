@@ -87,9 +87,8 @@ def update_output(contents):
                         title="Mapa de Calor"
                         )
 
-
+        # linha preta no centro
         fig1.update_xaxes(zeroline = True, zerolinewidth = 2, zerolinecolor='black')
-    
         fig2.update_xaxes(zeroline = True, zerolinewidth=  2, zerolinecolor='black')
         fig2.update_yaxes(zeroline = True, zerolinewidth = 2, zerolinecolor='black')
 
@@ -104,9 +103,9 @@ def update_output(contents):
     else:
 
         # cada subplot tem x (sendo x o numero de arquivos inseridos) colunas
-        fig1_sp = make_subplots(rows = 1, cols = len(df))
-        fig2_sp = make_subplots(rows = 1, cols = len(df))
-        fig3_sp = make_subplots(rows = 1, cols = len(df))
+        fig1_sp = make_subplots(rows = len(df), cols = 1)
+        fig2_sp = make_subplots(rows = len(df), cols = 1)
+        fig3_sp = make_subplots(rows = len(df), cols = 1)
 
         # subplot 1
         for i in range(len(df)):
@@ -117,7 +116,7 @@ def update_output(contents):
             
             # add o subplot 
             for trace in fig1.data:
-                fig1_sp.add_trace(trace, row = 1, col = i + 1)
+                fig1_sp.add_trace(trace, row = i + 1, col = 1)
 
         # subplot 2
         for i in range(len(df)):
@@ -127,7 +126,7 @@ def update_output(contents):
             
             # add o subplot
             for trace in fig2.data:
-                fig2_sp.add_trace(trace, row = 1, col = i + 1)
+                fig2_sp.add_trace(trace, row = i + 1, col = 1)
 
         # subplot 3
         for i in range(len(df)):
@@ -137,7 +136,7 @@ def update_output(contents):
             
             # add subplot
             for trace in fig3.data:
-                fig3_sp.add_trace(trace, row = 1, col = i + 1)
+                fig3_sp.add_trace(trace, row = i + 1, col = 1)
 
         
         # colocando labels e titulo
@@ -146,8 +145,8 @@ def update_output(contents):
         for i in range(len(df)):
             fig1_sp.update_xaxes(
                 title_text = "COP_ML (cm)",
-                row = 1,
-                col = i + 1
+                row = i + 1,
+                col = 1
             )
 
         fig2_sp.update_layout(title_text = "Gráfico de Dispersão")
@@ -156,29 +155,34 @@ def update_output(contents):
         for i in range(len(df)):
             fig2_sp.update_xaxes(
                 title_text = "COP_ML (cm)",
-                row = 1,
-                col = i + 1
+                row = i + 1,
+                col = 1
             )
             fig2_sp.update_yaxes(
                 title_text = "COP_AP (cm)",
-                row = 1,
-                col = i + 1
+                row = i + 1,
+                col = 1
             )
             fig3_sp.update_xaxes(
                 title_text = "COP_ML (cm)",
-                row = 1,
-                col = i + 1
+                row = i + 1,
+                col = 1
             )
             fig3_sp.update_yaxes(
                 title_text = "COP_AP (cm)",
-                row = 1,
-                col = i + 1
+                row = i + 1,
+                col = 1
             )
 
-        fig1_sp.update_xaxes(zeroline=True, zerolinewidth = 2, zerolinecolor='black')
-        
+        # linha preta indicando o centro
+        fig1_sp.update_xaxes(zeroline=True, zerolinewidth = 2, zerolinecolor='black')        
         fig2_sp.update_xaxes(zeroline=True, zerolinewidth = 2, zerolinecolor='black')
         fig2_sp.update_yaxes(zeroline=True, zerolinewidth = 2, zerolinecolor='black')
+
+        # melhorando a altura
+        fig1_sp.update_layout(height = 800)
+        fig2_sp.update_layout(height = 800)
+        fig3_sp.update_layout(height = 800)
 
 
         return html.Div([
