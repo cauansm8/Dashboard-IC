@@ -17,7 +17,7 @@ app.layout = html.Div([
     # parágrafo inicial
     html.H1(("Visualização Interativa de Dados Coletados por Plataformas de Força"),
         style={"textAlign": "center"}), 
-    
+
     # upload de arquivo
     dcc.Upload(     
         id='upload-arquivo',
@@ -51,11 +51,11 @@ app.layout = html.Div([
 
     # o callback é chamado quando ocorrer mudança no contents (conteúdo) do upload com id upload-arquivo
     Input('upload-arquivo', 'contents'),
-
+    State('upload-arquivo', 'filename')
 )
 
-def update_output(contents):
-    
+def update_output(contents, filename):
+
     df = []
 
     # le o arquivos e passa como ao df como lista (mesmo se for só um arquivo inserido)
@@ -69,7 +69,7 @@ def update_output(contents):
         fig1 = px.violin(df[0], x="OrigemCOP_ML",
                         box=True, points='all', hover_data=df[0].columns,
                         labels={"OrigemCOP_ML": "COP_ML (cm)"}, 
-                        title="Gráfico de Violino"
+                        title="Gráfico de Violino | Arquivo: " + filename[0] + "<br>"
                         )
 
 
@@ -77,14 +77,14 @@ def update_output(contents):
         # Gráfico de Dispersão
         fig2 = px.scatter(df[0], x="OrigemCOP_ML", y="OrigemCOP_AP",
                         labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
-                        title="Gráfico de Dispersão"
+                        title="Gráfico de Dispersão | Arquivo: " + filename[0] + "<br>"
                         )
         
 
         # Mapa de Calor
         fig3 = px.density_heatmap(df[0], x="OrigemCOP_ML", y="OrigemCOP_AP",
                         labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
-                        title="Mapa de Calor"
+                        title="Mapa de Calor | Arquivo: " + filename[0] + "<br>"
                         )
 
         # linha preta no centro
@@ -101,6 +101,12 @@ def update_output(contents):
     
     # caso 2: para mais de um gráf -> subplots
     else:
+
+        title = "Arquivos: "
+
+        for i in range (0, len(df)):
+            soma = i + 1
+            title += str(soma) + "- " + filename[i] + " | "
 
         # cada subplot tem x (sendo x o numero de arquivos inseridos) colunas
         fig1_sp = make_subplots(rows = len(df), cols = 1)
@@ -140,7 +146,7 @@ def update_output(contents):
 
         
         # colocando labels e titulo
-        fig1_sp.update_layout(title_text = "Gráfico de Violino")
+        fig1_sp.update_layout(title_text = "Gráfico de Violino <br>" + title)
         
         for i in range(len(df)):
             fig1_sp.update_xaxes(
@@ -149,8 +155,8 @@ def update_output(contents):
                 col = 1
             )
 
-        fig2_sp.update_layout(title_text = "Gráfico de Dispersão")
-        fig3_sp.update_layout(title_text = "Mapa de Calor")
+        fig2_sp.update_layout(title_text = "Gráfico de Dispersão <br>" + title)
+        fig3_sp.update_layout(title_text = "Mapa de Calor <br>" + title)
         
         for i in range(len(df)):
             fig2_sp.update_xaxes(
@@ -192,7 +198,7 @@ def update_output(contents):
         ])
 
 
-# somente gera o df (e preciso separar para dps implementar a inserção de +1 arquivo)
+# somente gera o df (é preciso separar para dps implementar a inserção de +1 arquivo)
 def gerarDf (contents):
     
     tipo_do_conteudo, string_do_conteudo = contents.split(',')
