@@ -52,12 +52,6 @@ def update_output(contents, filename):
     # caso 2: para mais de um gráf -> subplots
     else:
 
-        title = "Arquivos: "
-
-        for i in range (0, len(df)):
-            soma = i + 1
-            title += str(soma) + "- " + filename[i] + " | "
-
         # cada subplot tem x (sendo x o numero de arquivos inseridos) colunas
         fig1_sp = make_subplots(rows = len(df), cols = 1)
         fig2_sp = make_subplots(rows = len(df), cols = 1)
@@ -96,21 +90,21 @@ def update_output(contents, filename):
 
         
         # colocando labels e titulo
-        fig1_sp.update_layout(title_text = "Gráfico de Violino <br>" + title)
+        fig1_sp.update_layout(title_text = "Gráfico de Violino <br>")
         
         for i in range(len(df)):
             fig1_sp.update_xaxes(
-                title_text = "COP_ML (cm)",
+                title_text = "COP_ML (cm) - " + filename[i],
                 row = i + 1,
                 col = 1
             )
 
-        fig2_sp.update_layout(title_text = "Gráfico de Dispersão <br>" + title)
-        fig3_sp.update_layout(title_text = "Mapa de Calor <br>" + title)
+        fig2_sp.update_layout(title_text = "Gráfico de Dispersão <br>")
+        fig3_sp.update_layout(title_text = "Mapa de Calor <br>")
         
         for i in range(len(df)):
             fig2_sp.update_xaxes(
-                title_text = "COP_ML (cm)",
+                title_text = "COP_ML (cm) - " + filename[i],
                 row = i + 1,
                 col = 1
             )
@@ -120,7 +114,7 @@ def update_output(contents, filename):
                 col = 1
             )
             fig3_sp.update_xaxes(
-                title_text = "COP_ML (cm)",
+                title_text = "COP_ML (cm) - " + filename[i],
                 row = i + 1,
                 col = 1
             )
