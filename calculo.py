@@ -23,19 +23,16 @@ def gerarDf (contents):
         # az0 (espessura): medida de az0 transformada em metros, pois a plataforma de força está em metros
         az0 = 0.0433
 
-        # Frequência de aquisição de dados da plataforma de força, em Hz
-        freq_pf = 100
-
         # Calculando o COP (IMPORTANTE - alterei o cálculo para fazer tudo direto - sem o for - )
         #               com o for (de antes), o conteúdo estava sendo reescrito 
         cop_x = ((df['Fx'] * az0 - df['My']) / df['Fz']) * 100
         cop_y = ((df['Fy'] * az0 + df['Mx']) / df['Fz']) * 100
-        x_tempo = np.arange(len(df)) / freq_pf
+
 
         # Jogando as informações ao df (adiciona nova coluna ao dataframe)
         df['COP_ML'] = cop_x
         df['COP_AP'] = cop_y
-        df['Tempo'] = x_tempo
+        df['Tempo'] = np.linspace(0, 1, len(df))
 
         # Ajustando para a origem (ponto inicial vira 0,0) - Tales usou isto para iniciar as coordenadas no centro (0,0)
         df['OrigemCOP_ML'] = df['COP_ML'] - df['COP_ML'][0]

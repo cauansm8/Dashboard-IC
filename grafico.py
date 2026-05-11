@@ -19,7 +19,7 @@ def update_output(contents, filename):
         fig1 = px.violin(df[0], x="OrigemCOP_ML",
                         box=True, points='all', hover_data=df[0].columns,
                         labels={"OrigemCOP_ML": "COP_ML (cm)"}, 
-                        title="Gráfico de Violino | Arquivo: " + filename[0] + "<br>"
+                        title="Gráfico de Violino | Arquivo: " + filename[0] + "<br>", height=800
                         )
 
 
@@ -27,14 +27,14 @@ def update_output(contents, filename):
         # Gráfico de Dispersão
         fig2 = px.scatter(df[0], x="OrigemCOP_ML", y="OrigemCOP_AP",
                         labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
-                        title="Gráfico de Dispersão | Arquivo: " + filename[0] + "<br>"
+                        title="Gráfico de Dispersão | Arquivo: " + filename[0] + "<br>", color="Tempo", height=800
                         )
         
 
         # Mapa de Calor
         fig3 = px.density_heatmap(df[0], x="OrigemCOP_ML", y="OrigemCOP_AP",
                         labels={"OrigemCOP_ML": "COP_ML (cm)", "OrigemCOP_AP": "COP_AP (cm)"}, 
-                        title="Mapa de Calor | Arquivo: " + filename[0] + "<br>"
+                        title="Mapa de Calor | Arquivo: " + filename[0] + "<br>", height=800
                         )
 
         # linha preta no centro
@@ -72,7 +72,7 @@ def update_output(contents, filename):
         for i in range(len(df)):
 
             # Gráfico de Dispersão
-            fig2 = px.scatter(df[i], x="OrigemCOP_ML", y="OrigemCOP_AP")
+            fig2 = px.scatter(df[i], x="OrigemCOP_ML", y="OrigemCOP_AP", color="Tempo")
             
             # add o subplot
             for trace in fig2.data:
@@ -130,9 +130,9 @@ def update_output(contents, filename):
         fig2_sp.update_yaxes(zeroline=True, zerolinewidth = 2, zerolinecolor='black')
 
         # melhorando a altura
-        fig1_sp.update_layout(height = 800)
-        fig2_sp.update_layout(height = 800)
-        fig3_sp.update_layout(height = 800)
+        fig1_sp.update_layout(height = 400 * len(df))
+        fig2_sp.update_layout(height = 400 * len(df))
+        fig3_sp.update_layout(height = 400 * len(df))
 
 
         return html.Div([
