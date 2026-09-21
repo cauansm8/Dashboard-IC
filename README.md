@@ -28,4 +28,4 @@ profundidade, complementando a análise com os métodos estatísticos convencion
 
 3- Abra o http://127.0.0.1:8050
 
-4- Insira os arquivos da pasta "exemplo_dados""
+4- Insira os arquivos da pasta "exemplo_dados"
