@@ -19,3 +19,13 @@ deslocamento do Centro de Pressão, são representadas por meio de gráficos de 
 mapas de calor e gráficos de violino. Cada tipo de visualização permite uma leitura distinta,
 ampliando a compreensão dos dados e apoiando a tomada de decisões clínicas com maior
 profundidade, complementando a análise com os métodos estatísticos convencionais.
+
+## Como usar
+
+1- Execute main.py
+
+2- No terminal aparecerá "Running on http://127.0.0.1:8050"
+
+3- Abra o http://127.0.0.1:8050
+
+4- Insira os arquivos da pasta "exemplo_dados""
